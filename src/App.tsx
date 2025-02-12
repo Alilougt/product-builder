@@ -1,13 +1,26 @@
 import "./App.css";
 import ProductCard from "./components/ProductCard";
 import Button from "./components/ui/Button";
+import Input from "./components/ui/Input";
 import Modal from "./components/ui/Modal";
-import { productList } from "./data";
-import { useState } from "react";
+import { formInputsList, productList } from "./data";
+import { ChangeEvent, useState } from "react";
+import { IProduct } from "./interfaces";
 
 function App() {
   /* STATE */
   const [isOpen, setIsOpen] = useState(false);
+  const [product, setProduct] = useState<IProduct>({
+    title: "",
+    description: "",
+    imageURL: "",
+    price: "",
+    colors: [],
+    category: {
+      name: "",
+      imageURL: "",
+    },
+  });
 
   /* HANDLER */
   function open() {
@@ -17,11 +30,37 @@ function App() {
   function close() {
     setIsOpen(false);
   }
+  const onChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+    const { value, name } = event.target;
+    setProduct({
+      ...product,
+      [name]: value,
+    });
+  };
+
   /* RENDER */
   const renderProductList = productList.map((product) => {
     return <ProductCard key={product.id} product={product} />; // ** Renders ProductCard component
   });
-
+  const randerFormInputsList = formInputsList.map((input) => {
+    return (
+      <div className="flex flex-col">
+        <label
+          htmlFor={input.id}
+          className="mb-[1px] text-sm font-medium text-gray-700"
+        >
+          {input.label}
+        </label>
+        <Input
+          type="text"
+          id={input.id}
+          name={input.name}
+          value={product["title"]}
+          onChange={onChangeHandler}
+        />
+      </div>
+    );
+  });
   return (
     <main className="container mx-auto">
       <Button className="bg-indigo-700 hover:bg-indigo-600" onClick={open}>
@@ -31,10 +70,15 @@ function App() {
         {renderProductList}
       </div>
       <Modal isOpen={isOpen} close={close} title="Add A New Product">
-        <div className="flex items-center space-x-3">
-          <Button className="bg-indigo-700 hover:bg-indigo-600">Submit</Button>
-          <Button className="bg-gray-600 hover:bg-gray-400">Cancel</Button>
-        </div>
+        <form className="space-y-3">
+          {randerFormInputsList}
+          <div className="flex items-center space-x-3">
+            <Button className="bg-indigo-700 hover:bg-indigo-600">
+              Submit
+            </Button>
+            <Button className="bg-gray-600 hover:bg-gray-400">Cancel</Button>
+          </div>
+        </form>
       </Modal>
     </main>
   );
